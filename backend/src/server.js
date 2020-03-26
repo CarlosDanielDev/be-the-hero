@@ -1,3 +1,5 @@
 const app = require("./app");
 
-app.listen(5001, () => console.log("API - Online"));
+app.listen(process.env.PORT || 5001, () =>
+  console.log("API - Online  ", process.env.PORT, " PORTA")
+);

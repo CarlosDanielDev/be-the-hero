@@ -6,6 +6,8 @@ const SessionController = require("./controllers/SessionController");
 
 const routes = new Router();
 
+routes.get("/", (re, res) => res.send("API Heroes ONLINE!"));
+
 routes.post("/sessions", SessionController.create);
 
 routes.post("/ongs", OngController.create);
