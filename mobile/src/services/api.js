@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://192.168.3.150:5001"
+  baseURL: "https://protected-headland-81683.herokuapp.com"
 });
 
 export default api;

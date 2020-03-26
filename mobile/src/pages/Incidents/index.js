@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { ActivityIndicator } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import api from "../../services/api";
@@ -22,27 +23,41 @@ import {
 export default function Incidents() {
   const navigation = useNavigation();
   const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState();
+
   const [incidents, setIncidents] = useState([]);
   const [total, setTotal] = useState(0);
 
-  function navigateToDetail() {
-    navigation.navigate("Detail");
+  function navigateToDetail(incident) {
+    navigation.navigate("Detail", { incident });
   }
 
-  async function loadIncidents(page = 1) {
+  async function loadIncidents() {
+    if (loading) {
+      return;
+    }
+
+    if (total > 0 && incidents.length === total) {
+      return;
+    }
+
+    setLoading(true);
     try {
       const response = await api.get("/incidents", {
         params: {
           page
         }
       });
+
       const { data, headers } = response;
-      console.log("Headers", headers);
 
+      setIncidents([...incidents, ...data]);
       setTotal(headers["x-total-count"]);
-
-      setIncidents(data);
-    } catch (error) {}
+      setPage(page + 1);
+      setLoading(false);
+    } catch (error) {
+      console.log("Load Incidents", error);
+    }
   }
 
   useEffect(() => {
@@ -62,8 +77,10 @@ export default function Incidents() {
 
       <IncidentList
         data={incidents}
-        keyExtractor={incident => String(incident.id)}
+        keyExtractor={incident => String(incident.id + Math.random() * 100)}
         showsVerticalScrollIndicator={false}
+        onEndReached={loadIncidents}
+        onEndReachedThreshold={0.2}
         renderItem={({ item: incident }) => (
           <Incident>
             <Property>ONG:</Property>
@@ -80,7 +97,7 @@ export default function Incidents() {
               }).format(incident.value)}
             </Value>
 
-            <DetailButton onPress={navigateToDetail}>
+            <DetailButton onPress={() => navigateToDetail(incident)}>
               <DetailButtonText>Ver mais detalhes</DetailButtonText>
               <Feather name="arrow-right" size={16} color="#e02041" />
             </DetailButton>
